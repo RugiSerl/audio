@@ -2,69 +2,81 @@ package audio
 
 import (
 	"fmt"
-	"math"
 	"os"
 
-	"github.com/zenwerk/go-wave"
+	"github.com/go-audio/audio"
+	"github.com/go-audio/wav"
 )
 
 type Parameters struct {
+	//Format of the audio
 	WaveFormatType int
-	Channel        int
-	SampleRate     int
-	BitsPerSample  int
+	//Number of audio channels
+	Channel int
+	//Amount of samples in a second
+	SampleRate int
+	//Size of one sample
+	BitsPerSample int
 }
 
-// raw data containing the samples data
-type PcmBuffer [][]float64
-
 // parse all the data all at once. Simple but unoptimised
-func Parse(fileName string) PcmBuffer {
-	reader, err := wave.NewReader(fileName)
-
+func Parse(fileName string) (*audio.IntBuffer, Parameters, error) {
+	//retrieve the stats
+	f, err := os.Open(fileName)
 	if err != nil {
-		panic(err)
+		return nil, Parameters{}, err
+	}
+	d := wav.NewDecoder(f)
+	d.ReadInfo()
+	p := Parameters{
+		WaveFormatType: int(d.WavAudioFormat),
+		Channel:        int(d.NumChans),
+		SampleRate:     int(d.SampleRate),
+		BitsPerSample:  int(d.BitDepth),
+	}
+	samples, err := d.FullPCMBuffer()
+	if err != nil {
+		return nil, Parameters{}, err
 	}
 
-	var e error = nil
-	var s PcmBuffer = make(PcmBuffer, reader.NumSamples)
+	fmt.Println(p)
 
-	for i := 0; e == nil; i++ {
-		s[i], e = reader.ReadSample()
-		fmt.Println(s[i])
-	}
-
-	return s
-
+	return samples, p, nil
 }
 
 // Save the whole buffer
-func Save(fileName string, buffer PcmBuffer, param Parameters) {
+func Save(fileName string, buffer *audio.IntBuffer, param Parameters) error {
+	//creating file
 	f, err := os.Create(fileName)
-
-	parameter := wave.WriterParam{
-		Out:            f,
-		WaveFormatType: param.WaveFormatType,
-		Channel:        param.Channel,
-		SampleRate:     param.SampleRate,
-		BitsPerSample:  param.BitsPerSample,
-	}
-
 	if err != nil {
-		panic(err)
+		return err
+	}
+	e := wav.NewEncoder(f, param.SampleRate, param.BitsPerSample, param.Channel, param.WaveFormatType)
+
+	e.Write(buffer)
+	e.Close()
+	f.Close()
+
+	return nil
+
+}
+func initBuffer(param Parameters, size int) *audio.IntBuffer {
+	format := &audio.Format{
+		NumChannels: int(param.Channel),
+		SampleRate:  int(param.SampleRate),
 	}
 
-	w, err := wave.NewWriter(parameter)
+	buf := &audio.IntBuffer{Data: make([]int, size), Format: format, SourceBitDepth: int(param.BitsPerSample)}
 
-	for _, e := range buffer {
-		w.WriteSample16([]int16{int16(e[0] * math.Pow(2, 24))})
+	return buf
+}
 
-	}
-
-	if err != nil {
-		panic(err)
-	}
-
-	w.Close()
+func initBufferWithOthersStat(buf *audio.IntBuffer) *audio.IntBuffer {
+	return initBuffer(Parameters{
+		WaveFormatType: -1, // this doesn't actually matter
+		Channel:        buf.Format.NumChannels,
+		SampleRate:     buf.Format.SampleRate,
+		BitsPerSample:  buf.SourceBitDepth,
+	}, len(buf.Data))
 
 }
