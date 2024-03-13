@@ -1,13 +1,14 @@
 package plot
 
 import (
+	"audio/math"
 	"image"
 	"image/color"
 	"image/png"
 	"os"
 )
 
-func GenerateImage(data [][]float64, name string) {
+func GenerateImage(data []math.Magnitudes, name string) {
 
 	width := len(data)
 	height := len(data[0])

@@ -35,9 +35,9 @@ func ReduceAmp(data *audio.IntBuffer) *audio.IntBuffer {
 
 }
 
-func FourierTest(data []int, bitDepth uint16) {
+func FourierTest(data []int, bitDepth uint16) []math.Magnitudes {
 	TimeInterval := 500 //samples
-	List := [][]float64{}
+	List := []math.Magnitudes{}
 	var maxMagnitude float64 = 0 // positive real number
 
 	for i := 0; i < len(data)/TimeInterval; i++ {
@@ -61,4 +61,5 @@ func FourierTest(data []int, bitDepth uint16) {
 
 	plot.GenerateImage(List, "fourrier")
 
+	return List
 }

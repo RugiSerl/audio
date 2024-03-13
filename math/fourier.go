@@ -3,11 +3,11 @@ package math
 import "math"
 
 //list of magnitudes of complex numbers, with length = n of frequency bins
-type magnitudes []float64
+type Magnitudes []float64
 
-func GetMagnitudes(data []int, begin int, end int) (magnitudes, float64) {
+func GetMagnitudes(data []int, begin int, end int) (Magnitudes, float64) {
 	var maxMagnitude float64 = 0 // positive real number
-	magnitudes := magnitudes{}
+	magnitudes := Magnitudes{}
 	for k := 1; k < (end-begin)/2; k++ {
 		mag := Norm(Ftransform(data[begin:end], k))
 		magnitudes = append(magnitudes, mag)
