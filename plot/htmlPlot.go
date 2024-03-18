@@ -1,6 +1,7 @@
 package plot
 
 import (
+	"fmt"
 	"io"
 	"os"
 
@@ -14,7 +15,7 @@ func generateItems(data [][]float64) []opts.HeatMapData {
 	for t := 0; t < len(data); t++ {
 		for i := 0; i < len(data[t]); i++ {
 			items[t*len(data[0])+i] = opts.HeatMapData{
-				Name:  string(i),
+				Name:  fmt.Sprintf("%d", i),
 				Value: []interface{}{t, i, data[t][i]},
 			}
 		}

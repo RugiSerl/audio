@@ -34,19 +34,19 @@ func displayVisual(m m.MagnitudesList, time float32) {
 }
 
 // temp
-func playAudio() {
-	m := rl.LoadSound("assets/cloches.wav")
+func playAudio(filename string) {
+	m := rl.LoadSound(filename)
 
 	rl.PlaySound(m)
 	fmt.Println(m.FrameCount)
 	soundStart = float32(rl.GetTime())
 }
 
-func InitVisual(audioBuffer *audio.IntBuffer, magnitudeList m.MagnitudesList) {
+func InitVisual(audioBuffer *audio.IntBuffer, magnitudeList m.MagnitudesList, filename string) {
 	rl.InitWindow(800, 450, "raylib [core] example - basic window")
 	rl.InitAudioDevice()
 
-	playAudio()
+	playAudio(filename)
 
 	//load all the dat
 	rl.SetTargetFPS(60)
