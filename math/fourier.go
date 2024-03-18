@@ -4,6 +4,11 @@ import "math"
 
 //list of magnitudes of complex numbers, with length = n of frequency bins
 type Magnitudes []float64
+type MagnitudesList struct {
+	Data         []Magnitudes
+	SampleAmount int
+	DeltaTime    float32
+}
 
 func GetMagnitudes(data []int, begin int, end int) (Magnitudes, float64) {
 	var maxMagnitude float64 = 0 // positive real number

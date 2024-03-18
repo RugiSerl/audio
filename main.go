@@ -11,8 +11,9 @@ const (
 
 func main() {
 	buf, data, _ := audio.Parse(AUDIO_FILENAME)
-	list := audio.FourierTest(buf.Data, uint16(buf.SourceBitDepth))
+	list := audio.FourierTest(buf, uint16(buf.SourceBitDepth))
 	window.InitVisual(buf, list)
+	//window.Test()
 	audio.Save("assets/output.wav", buf, data)
 
 }

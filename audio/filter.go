@@ -35,15 +35,15 @@ func ReduceAmp(data *audio.IntBuffer) *audio.IntBuffer {
 
 }
 
-func FourierTest(data []int, bitDepth uint16) []math.Magnitudes {
+func FourierTest(data *audio.IntBuffer, bitDepth uint16) math.MagnitudesList {
 	TimeInterval := 500 //samples
-	List := []math.Magnitudes{}
+	List := math.MagnitudesList{}
 	var maxMagnitude float64 = 0 // positive real number
 
-	for i := 0; i < len(data)/TimeInterval; i++ {
+	for i := 0; i < len(data.Data)/TimeInterval; i++ {
 		fmt.Println(i*TimeInterval, " samples")
-		magnitudes, localmax := math.GetMagnitudes(data, i*TimeInterval, (i+1)*TimeInterval)
-		List = append(List, magnitudes)
+		magnitudes, localmax := math.GetMagnitudes(data.Data, i*TimeInterval, (i+1)*TimeInterval)
+		List.Data = append(List.Data, magnitudes)
 
 		if localmax > maxMagnitude {
 			maxMagnitude = localmax
@@ -51,15 +51,18 @@ func FourierTest(data []int, bitDepth uint16) []math.Magnitudes {
 
 	}
 
-	for i := range List {
-		for j := range List[i] {
+	for i := range List.Data {
+		for j := range List.Data[i] {
 			//we are normalizing all the magnitudes to get everything between 0 and 1
-			List[i][j] /= maxMagnitude
+			List.Data[i][j] /= maxMagnitude
 
 		}
 	}
 
-	plot.GenerateImage(List, "fourrier")
+	plot.GenerateImage(List.Data, "fourrier")
+
+	List.SampleAmount = len(data.Data) / TimeInterval
+	List.DeltaTime = 1 / (float32(data.Format.SampleRate) / float32(TimeInterval))
 
 	return List
 }

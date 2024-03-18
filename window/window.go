@@ -2,7 +2,7 @@ package window
 
 import (
 	m "audio/math"
-	"math"
+	"fmt"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"github.com/go-audio/audio"
@@ -10,57 +10,59 @@ import (
 
 const (
 	maxSamplesPerUpdate = 4096
+	SPECTRE_WIDTH       = 400 //px
+	SPECTRE_HEIGHT      = 200 //px
+
 )
 
-func InitVisual(audioBuffer *audio.IntBuffer, magnitudeList []m.Magnitudes) {
-	rl.InitWindow(800, 450, "raylib [core] example - basic window")
-	rl.InitAudioDevice()
-	stream := rl.LoadAudioStream(uint32(audioBuffer.Format.SampleRate), uint32(audioBuffer.SourceBitDepth), uint32(audioBuffer.Format.NumChannels))
+var (
+	soundStart float32 = 0
+)
 
-	//load all the data
-	data := make([]float32, len(audioBuffer.Data))
-	maxAmplitude := float32(math.Pow(2, float64(audioBuffer.SourceBitDepth)))
-	for i := 0; i < len(audioBuffer.Data); i++ {
-		data[i] = float32(audioBuffer.Data[i]) / maxAmplitude
+func displayVisual(m m.MagnitudesList, time float32) {
+	i := int((time - soundStart) / m.DeltaTime)
+	if i < len(m.Data) {
+		rl.DrawRectangleV(rl.NewVector2(float32(rl.GetScreenWidth())/2-SPECTRE_WIDTH/2, float32(rl.GetScreenHeight())/2-SPECTRE_HEIGHT/2), rl.NewVector2(SPECTRE_WIDTH, SPECTRE_HEIGHT), rl.Gray)
+
+		for j := 0; j < len(m.Data[i]); j++ {
+			rl.DrawRectangleV(rl.NewVector2(float32(rl.GetScreenWidth())/2-SPECTRE_WIDTH/2+float32(j)*SPECTRE_WIDTH/float32(len(m.Data)), float32(rl.GetScreenHeight())/2-SPECTRE_HEIGHT/2), rl.NewVector2(SPECTRE_WIDTH/float32(len(m.Data)), SPECTRE_HEIGHT*float32(m.Data[i][j])), rl.Black)
+
+		}
+
 	}
 
-	// NOTE: The generated MAX_SAMPLES do not fit to close a perfect loop
-	// for that reason, there is a clip everytime audio stream is looped
-	rl.PlayAudioStream(stream)
+}
 
-	totalSamples := int32(len(audioBuffer.Data))
-	samplesLeft := int32(totalSamples)
+// temp
+func playAudio() {
+	m := rl.LoadSound("assets/cloches.wav")
 
-	rl.SetTargetFPS(30)
+	rl.PlaySound(m)
+	fmt.Println(m.FrameCount)
+	soundStart = float32(rl.GetTime())
+}
+
+func InitVisual(audioBuffer *audio.IntBuffer, magnitudeList m.MagnitudesList) {
+	rl.InitWindow(800, 450, "raylib [core] example - basic window")
+	rl.InitAudioDevice()
+
+	playAudio()
+
+	//load all the dat
+	rl.SetTargetFPS(60)
 
 	for !rl.WindowShouldClose() {
-		// Refill audio stream if required
-		if rl.IsAudioStreamProcessed(stream) {
-			numSamples := int32(0)
-			if samplesLeft >= maxSamplesPerUpdate {
-				numSamples = maxSamplesPerUpdate
-			} else {
-				numSamples = samplesLeft
-			}
-
-			rl.UpdateAudioStream(stream, data[totalSamples-samplesLeft:])
-
-			samplesLeft -= numSamples
-
-			// Reset samples feeding (loop audio)
-			if samplesLeft <= 0 {
-				samplesLeft = totalSamples
-			}
-		}
 
 		rl.BeginDrawing()
 
 		rl.ClearBackground(rl.RayWhite)
 
+		displayVisual(magnitudeList, float32(rl.GetTime()))
+
+		rl.DrawText("this is a test", 50, 50, 50, rl.Black)
+
 		rl.EndDrawing()
 	}
-
-	rl.UnloadAudioStream(stream) // Close raw audio stream and delete buffers from RAM
 
 	rl.CloseAudioDevice() // Close audio device (music streaming is automatically stopped)
 
