@@ -32,10 +32,32 @@ func ReduceAmp(data *audio.IntBuffer) *audio.IntBuffer {
 		data.Data[i] = int(float32(data.Data[i]) * factor)
 	}
 	return data
-
 }
 
-func FourierTest(data *audio.IntBuffer, bitDepth uint16) math.MagnitudesList {
+func LowPassFilter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
+	TimeInterval := 500 //samples
+	var fourrierCoefficients []math.Complex
+
+	for i := 0; i < len(data.Data)/TimeInterval; i++ {
+		fmt.Println(i*TimeInterval, " samples")
+		fourrierCoefficients = []math.Complex{}
+
+		//décomposition du signal
+		for j := 0; j < TimeInterval; j++ {
+			fourrierCoefficients = append(fourrierCoefficients, math.Ftransform(data.Data[i*TimeInterval:(i+1)*TimeInterval], j))
+		}
+
+		//recomposition du signal
+		for j := 0; j < TimeInterval/2; j++ {
+			data.Data[i*TimeInterval+j] = int(math.InverseFtransform(data.Data[i*TimeInterval:(i+1)*TimeInterval], j).Re)
+		}
+
+	}
+
+	return data
+}
+
+func FourierTest(data *audio.IntBuffer) math.MagnitudesList {
 	TimeInterval := 500 //samples
 	List := math.MagnitudesList{}
 	var maxMagnitude float64 = 0 // positive real number

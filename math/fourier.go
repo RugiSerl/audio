@@ -34,3 +34,7 @@ func Ftransform(sample []int, freqbin int) Complex {
 	}
 	return sum
 }
+
+func InverseFtransform(sample []int, freqbin int) Complex {
+	return Mult(Ftransform(sample, freqbin), Complex{Re: 1 / float64(len(sample)), Im: 0})
+}

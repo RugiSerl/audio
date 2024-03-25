@@ -25,7 +25,7 @@ func displayVisual(m m.MagnitudesList, time float32) {
 		rl.DrawRectangleV(rl.NewVector2(float32(rl.GetScreenWidth())/2-SPECTRE_WIDTH/2, float32(rl.GetScreenHeight())/2-SPECTRE_HEIGHT/2), rl.NewVector2(SPECTRE_WIDTH, SPECTRE_HEIGHT), rl.Gray)
 
 		for j := 0; j < len(m.Data[i]); j++ {
-			rl.DrawRectangleV(rl.NewVector2(float32(rl.GetScreenWidth())/2-SPECTRE_WIDTH/2+float32(j)*SPECTRE_WIDTH/float32(len(m.Data)), float32(rl.GetScreenHeight())/2-SPECTRE_HEIGHT/2), rl.NewVector2(SPECTRE_WIDTH/float32(len(m.Data)), SPECTRE_HEIGHT*float32(m.Data[i][j])), rl.Black)
+			rl.DrawRectangleV(rl.NewVector2(float32(rl.GetScreenWidth())/2-SPECTRE_WIDTH/2+float32(j)*SPECTRE_WIDTH/float32(len(m.Data[i])+1), float32(rl.GetScreenHeight())/2-SPECTRE_HEIGHT/2), rl.NewVector2(SPECTRE_WIDTH/float32(len(m.Data)), SPECTRE_HEIGHT*float32(m.Data[i][j])), rl.Black)
 
 		}
 
@@ -58,8 +58,6 @@ func InitVisual(audioBuffer *audio.IntBuffer, magnitudeList m.MagnitudesList, fi
 		rl.ClearBackground(rl.RayWhite)
 
 		displayVisual(magnitudeList, float32(rl.GetTime()))
-
-		rl.DrawText("this is a test", 50, 50, 50, rl.Black)
 
 		rl.EndDrawing()
 	}
