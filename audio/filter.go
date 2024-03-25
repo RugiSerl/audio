@@ -34,7 +34,9 @@ func ReduceAmp(data *audio.IntBuffer) *audio.IntBuffer {
 	return data
 }
 
-func LowPassFilter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
+
+
+func Filter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
 	TimeInterval := 500 //samples
 	var fourrierCoefficients []math.Complex
 
@@ -47,9 +49,10 @@ func LowPassFilter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
 			fourrierCoefficients = append(fourrierCoefficients, math.Ftransform(data.Data[i*TimeInterval:(i+1)*TimeInterval], j))
 		}
 
+
 		//recomposition du signal
-		for j := 0; j < TimeInterval/2; j++ {
-			data.Data[i*TimeInterval+j] = int(math.InverseFtransform(data.Data[i*TimeInterval:(i+1)*TimeInterval], j).Re)
+		for j := 0; j < TimeInterval; j++ {
+			data.Data[i*TimeInterval+j] = int(math.InverseFtransform(fourrierCoefficients, j, data.SourceBitDepth))
 		}
 
 	}

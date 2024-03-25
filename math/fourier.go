@@ -1,8 +1,10 @@
 package math
 
-import "math"
+import (
+	"math"
+)
 
-//list of magnitudes of complex numbers, with length = n of frequency bins
+// list of magnitudes of complex numbers, with length = n of frequency bins
 type Magnitudes []float64
 type MagnitudesList struct {
 	Data         []Magnitudes
@@ -26,15 +28,21 @@ func GetMagnitudes(data []int, begin int, end int) (Magnitudes, float64) {
 
 }
 
-func Ftransform(sample []int, freqbin int) Complex {
-	N := len(sample)
+func Ftransform(samples []int, freqbin int) Complex {
+	N := len(samples)
 	sum := Complex{Re: 0, Im: 0}
 	for n := 0; n < N; n++ {
-		sum = Add(sum, Mult(Complex{Re: float64(sample[n]), Im: 0}, ExpI(-2*math.Pi*float64(freqbin)*float64(n)/float64(N))))
+		sum = Add(sum, Mult(Complex{Re: float64(samples[n]), Im: 0}, ExpI(-2*math.Pi*float64(freqbin)*float64(n)/float64(N))))
 	}
 	return sum
 }
 
-func InverseFtransform(sample []int, freqbin int) Complex {
-	return Mult(Ftransform(sample, freqbin), Complex{Re: 1 / float64(len(sample)), Im: 0})
+func InverseFtransform(coefficients []Complex, index int, bitDepth int) float64 {
+	N := len(coefficients)
+	sum := Complex{Re: 0, Im: 0}
+	for n := 0; n < N; n++ {
+		sum = Add(sum, Mult(coefficients[n], ExpI(2*math.Pi*float64(index)*float64(n)/float64(N))))
+	}
+
+	return (sum.Re*math.Cos(2*math.Pi*float64(index)) + sum.Im*math.Sin(2*math.Pi*float64(index))) / float64(N)
 }

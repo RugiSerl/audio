@@ -12,10 +12,12 @@ const (
 
 func main() {
 	buf, data, _ := audio.Parse(AUDIO_FILENAME)
-	list := audio.FourierTest(buf)
-	buf = audio.LowPassFilter(buf, 600)
-	window.InitVisual(buf, list, AUDIO_FILENAME)
-	//window.Test()
+
+	buf = audio.Filter(buf, 600)
 	audio.Save("assets/output.wav", buf, data)
+	list := audio.FourierTest(buf)
+
+	window.InitVisual(buf, list, "assets/output.wav")
+	//window.Test()
 
 }
