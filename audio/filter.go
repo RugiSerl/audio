@@ -34,25 +34,24 @@ func ReduceAmp(data *audio.IntBuffer) *audio.IntBuffer {
 	return data
 }
 
-
-
 func Filter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
-	TimeInterval := 500 //samples
+	TimeInterval := 1024 //samples
 	var fourrierCoefficients []math.Complex
 
 	for i := 0; i < len(data.Data)/TimeInterval; i++ {
 		fmt.Println(i*TimeInterval, " samples")
-		fourrierCoefficients = []math.Complex{}
 
-		//décomposition du signal
+		//signal decomposition
+		fourrierCoefficients = math.Ftransform(math.MapIntArrayToTimeDomainData(data.Data[i*TimeInterval : (i+1)*TimeInterval]))
+		// frequency domain manipulation
+		// for i := len(fourrierCoefficients) / 8; i < len(fourrierCoefficients); i++ {
+		// 	fourrierCoefficients[i] = math.Complex{Re: 0, Im: 0}
+		// }
+
+		//reconstruction of signal
+		sample := math.MapTimeDomainDataArrayToInt(math.InverseFtransform(fourrierCoefficients))
 		for j := 0; j < TimeInterval; j++ {
-			fourrierCoefficients = append(fourrierCoefficients, math.Ftransform(data.Data[i*TimeInterval:(i+1)*TimeInterval], j))
-		}
-
-
-		//recomposition du signal
-		for j := 0; j < TimeInterval; j++ {
-			data.Data[i*TimeInterval+j] = int(math.InverseFtransform(fourrierCoefficients, j, data.SourceBitDepth))
+			data.Data[i*TimeInterval+j] = sample[j]
 		}
 
 	}
@@ -67,7 +66,7 @@ func FourierTest(data *audio.IntBuffer) math.MagnitudesList {
 
 	for i := 0; i < len(data.Data)/TimeInterval; i++ {
 		fmt.Println(i*TimeInterval, " samples")
-		magnitudes, localmax := math.GetMagnitudes(data.Data, i*TimeInterval, (i+1)*TimeInterval)
+		magnitudes, localmax := math.GetMagnitudes(math.MapIntArrayToTimeDomainData(data.Data), i*TimeInterval, (i+1)*TimeInterval)
 		List.Data = append(List.Data, magnitudes)
 
 		if localmax > maxMagnitude {

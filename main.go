@@ -3,6 +3,7 @@ package main
 import (
 	"audio/audio"
 	"audio/window"
+	"fmt"
 )
 
 const (
@@ -11,7 +12,9 @@ const (
 )
 
 func main() {
+	fmt.Println("parsing audio...")
 	buf, data, _ := audio.Parse(AUDIO_FILENAME)
+	fmt.Println("parsing done.")
 
 	buf = audio.Filter(buf, 600)
 	audio.Save("assets/output.wav", buf, data)
