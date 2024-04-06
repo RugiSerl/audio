@@ -81,26 +81,26 @@ func InverseDFT(coefficients FrequencyDomainData) TimeDomainData {
 // Cooley Tuckey divide and conquer algorithm.
 // Information and pseudo code here : https://fr.wikipedia.org/wiki/Transformation_de_Fourier_rapide#Pseudo-code
 func FFTAux(samples Polynomial, ω Complex) FrequencyDomainData {
-	n := len(samples.coefs)
+	N := len(samples.coefs)
 
 	//constant polynomial case
-	if n == 1 {
+	if N == 1 {
 		return []Complex{samples.coefs[0]}
 	} else {
 
 		// calculate one time ω² to avoid unnecessary multiplications
 		ω2 := ω.Pow(2)
 
-		//get recursive results from even and odd part of the polynomial
+		// get recursive results from even and odd part of the polynomial
 		evenResults := FFTAux(samples.Even(), ω2)
 		oddResults := FFTAux(samples.Odd(), ω2)
 
-		//merge back the result of the recursive results
-		results := make([]Complex, n)
+		// merge back the result of the recursive results
+		results := make([]Complex, N)
 		ωk := Real(1)
-		for k := 0; k < n/2; k++ {
+		for k := 0; k < N/2; k++ {
 			results[k] = Add(evenResults[k], Mult(ωk, oddResults[k]))
-			results[k+n/2] = Substract(evenResults[k], Mult(ωk, oddResults[k]))
+			results[k+N/2] = Substract(evenResults[k], Mult(ωk, oddResults[k]))
 
 			ωk = Mult(ωk, ω) // avoid to call ω.Pow(k)
 		}
@@ -111,9 +111,9 @@ func FFTAux(samples Polynomial, ω Complex) FrequencyDomainData {
 }
 
 func FFT(samples TimeDomainData) FrequencyDomainData {
-	return FFTAux(Polynomial{samples}, Omega(1/float64(len(samples))))
+	return FFTAux(Polynomial{samples}, Omega(-1/float64(len(samples))))
 }
 
 func InverseFFT(coefficients FrequencyDomainData) TimeDomainData {
-	return MapCoefsToTimeDomainData(FFTAux(Polynomial{coefficients}, Omega(-1/float64(len(coefficients)))))
+	return MapCoefsToTimeDomainData(FFTAux(Polynomial{coefficients}, Omega(1/float64(len(coefficients)))))
 }

@@ -13,7 +13,7 @@ func Real(x float64) Complex {
 
 // Multiply two complex numbers
 func Mult(z1, z2 Complex) Complex {
-	return Complex{Re: z1.Re*z2.Re - z1.Im*z2.Im, Im: z1.Re*z2.Im + z2.Im*z2.Im}
+	return Complex{Re: z1.Re*z2.Re - z1.Im*z2.Im, Im: z1.Re*z2.Im + z1.Im*z2.Re}
 }
 
 // Add two complex numbers
@@ -21,7 +21,7 @@ func Add(z1, z2 Complex) Complex {
 	return Complex{Re: z1.Re + z2.Re, Im: z1.Im + z2.Im}
 }
 
-// Substracttwo complex numbers
+// Substract two complex numbers
 func Substract(z1, z2 Complex) Complex {
 	return Complex{Re: z1.Re - z2.Re, Im: z1.Im - z2.Im}
 }

@@ -45,6 +45,7 @@ func playAudio(filename string) {
 func InitVisual(audioBuffer *audio.IntBuffer, magnitudeList visual.MagnitudesList, filename string) {
 	rl.InitWindow(800, 450, "raylib [core] example - basic window")
 	rl.InitAudioDevice()
+	rl.SetMasterVolume(0.1)
 
 	playAudio(filename)
 
