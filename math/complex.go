@@ -21,6 +21,11 @@ func Add(z1, z2 Complex) Complex {
 	return Complex{Re: z1.Re + z2.Re, Im: z1.Im + z2.Im}
 }
 
+// Substracttwo complex numbers
+func Substract(z1, z2 Complex) Complex {
+	return Complex{Re: z1.Re - z2.Re, Im: z1.Im - z2.Im}
+}
+
 // Imaginary exponential
 func ExpI(x float64) Complex {
 	return Complex{Re: math.Cos(x), Im: math.Sin(x)}

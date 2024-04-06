@@ -16,7 +16,7 @@ func NewPolynomialFromReal(coefs []float64) Polynomial {
 func (p Polynomial) Odd() Polynomial {
 	r := Polynomial{make([]Complex, len(p.coefs)/2)}
 	for i := 0; i < len(p.coefs)/2; i++ {
-		r.coefs[i] = p.coefs[2*i]
+		r.coefs[i] = p.coefs[2*i+1]
 	}
 	return r
 }
@@ -25,7 +25,7 @@ func (p Polynomial) Odd() Polynomial {
 func (p Polynomial) Even() Polynomial {
 	r := Polynomial{make([]Complex, len(p.coefs)/2)}
 	for i := 0; i < len(p.coefs)/2; i++ {
-		r.coefs[i] = p.coefs[2*i+1]
+		r.coefs[i] = p.coefs[2*i]
 	}
 	return r
 }

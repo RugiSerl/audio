@@ -4,57 +4,50 @@ import (
 	"math"
 )
 
-// list of magnitudes of complex numbers, with length = n of frequency bins
-type Magnitudes []float64
-type MagnitudesList struct {
-	Data         []Magnitudes
-	SampleAmount int
-	DeltaTime    float32
-}
-
-type timeDomainData = []float64
+type TimeDomainData = []Complex
 type FrequencyDomainData = []Complex
 
+//---------------------------------------------------------------------------------
+// Mapping functions
+
 // Annoying practical function because most of audio format samples are of type int
-func MapIntArrayToTimeDomainData(samples []int) timeDomainData {
-	r := make(timeDomainData, len(samples))
+func MapIntArrayToTimeDomainData(samples []int) TimeDomainData {
+	r := make(TimeDomainData, len(samples))
 	for i := 0; i < len(samples); i++ {
-		r[i] = float64(samples[i])
+		r[i] = Real(float64(samples[i]))
 	}
 	return r
 }
 
 // Annoying practical function because most of audio format samples are of type int
-func MapTimeDomainDataArrayToInt(samples timeDomainData) []int {
+func MapTimeDomainDataToIntArray(samples TimeDomainData) []int {
 	r := make([]int, len(samples))
 	for i := 0; i < len(samples); i++ {
-		r[i] = int(samples[i])
+		r[i] = int(samples[i].Re)
 	}
 	return r
 }
 
-func GetMagnitudes(data timeDomainData, begin int, end int) (Magnitudes, float64) {
-	var maxMagnitude float64 = 0 // positive real number
-	magnitudes := Magnitudes{}
-	coefs := Ftransform(data[begin:end])
-	for k := 1; k < (end-begin)/2; k++ {
-		mag := Norm(coefs[k])
-		magnitudes = append(magnitudes, mag)
-		if mag > maxMagnitude {
-			maxMagnitude = mag
-		}
+// map fourier coefficients to time
+func MapCoefsToTimeDomainData(coefficients FrequencyDomainData) TimeDomainData {
+	r := make(TimeDomainData, len(coefficients))
+	for i := 0; i < len(coefficients); i++ {
+		r[i] = Real((1/float64(len(coefficients)))*coefficients[i].Re*math.Cos(2*math.Pi*float64(i)) + coefficients[i].Im*math.Sin(2*math.Pi*float64(i)))
 	}
-	return magnitudes, maxMagnitude
+	return r
 }
+
+//---------------------------------------------------------------------------------
+// Fourrier functions
 
 // Naive DTF algorithm in O(n²) (nested loops).
 // Take time domain samples and returns frequency domains values.
 // The values in the frequency domain are in that form :
 // {amount of cosine of frequency} + i{amount of sine of frequency}.
 // So to get the magnitude of the signal of the frequency a + ib,
-// We calculate √(a²+b²) (Acos(wt) + Bsin(wt) = |A+iB|cos(wt + phi)).
-// So phi ≡ artan(b/a) [pi]
-func Ftransform(samples timeDomainData) FrequencyDomainData {
+// We calculate √(a²+b²) (Acos(ωt) + Bsin(ωt) = |A+iB|cos(ωt + phi)).
+// So phi ≡ arg(a+ib) ≡ artan(b/a) [pi]
+func DFTAux(samples TimeDomainData, inverse bool) FrequencyDomainData {
 	N := len(samples)
 	fourrierCoefficients := make([]Complex, N)
 	//loop trough all frequencies possibilities
@@ -62,60 +55,54 @@ func Ftransform(samples timeDomainData) FrequencyDomainData {
 
 		//c[f] = ∑s[n]exp(-2πnf/N), n∈[0, N[
 		for n := 0; n < N; n++ {
-			fourrierCoefficients[f] = Add(fourrierCoefficients[f], Mult(Real(samples[n]), Omega(float64(f)*float64(n)/float64(N))))
+			var ω Complex
+			if inverse {
+				//inverse fourier transform is almost identical, just inverse the sign of ω and divide the sum by N
+				ω = Omega(float64(f) * float64(n) / float64(N))
+			} else {
+				ω = Omega(-float64(f) * float64(n) / float64(N))
+			}
+			fourrierCoefficients[f] = Add(fourrierCoefficients[f], Mult(samples[n], ω))
 		}
+
 	}
 
 	return fourrierCoefficients
 }
 
-// Inverse DFT, O(n²) and takes frequency domain coefficients to returns its time domains samples
-// Very similar to DFT, since it is the same as calculating the inverse Vandermonde matrix
-// (more information here : https://fr.wikipedia.org/wiki/Transformation_de_Fourier_rapide#Formulation_math%C3%A9matique)
-func InverseFtransform(coefficients FrequencyDomainData) timeDomainData {
-	N := len(coefficients)
-	Samples := make([]float64, N)
+func DFT(samples TimeDomainData) FrequencyDomainData {
+	return DFTAux(samples, true)
+}
 
-	//loop trough all sample positions
-	for n := 0; n < N; n++ {
-		sum := Complex{0, 0}
-		//s[n]*N = ∑c[f]exp(-2πnf/N), f∈[0, N[
-		for f := 0; f < N; f++ {
-			sum = Add(sum, Mult(coefficients[f], Omega(-1*float64(n)*float64(f)/float64(N))))
-		}
-
-		//reconstruct signal using the coefficients of sine and cosine
-		Samples[n] = (1.0 / float64(N)) * (sum.Re*math.Cos(2*math.Pi*float64(n)) + sum.Im*math.Sin(2*math.Pi*float64(n)))
-
-	}
-
-	return Samples
+func InverseDFT(coefficients FrequencyDomainData) TimeDomainData {
+	return MapCoefsToTimeDomainData(DFTAux(coefficients, false))
 }
 
 // Cooley Tuckey divide and conquer algorithm.
 // Information and pseudo code here : https://fr.wikipedia.org/wiki/Transformation_de_Fourier_rapide#Pseudo-code
-func FFTAux(samples Polynomial, unityRoot Complex) FrequencyDomainData {
+func FFTAux(samples Polynomial, ω Complex) FrequencyDomainData {
 	n := len(samples.coefs)
+
 	//constant polynomial case
 	if n == 1 {
-		return []Complex{samples.Evaluate(Real(1))}
-
+		return []Complex{samples.coefs[0]}
 	} else {
 
-		evenPart := samples.Even()
-		oddPart := samples.Odd()
+		// calculate one time ω² to avoid unnecessary multiplications
+		ω2 := ω.Pow(2)
 
-		evenResults := FFTAux(evenPart, unityRoot.Pow(2))
-		oddResults := FFTAux(oddPart, unityRoot.Pow(2))
+		//get recursive results from even and odd part of the polynomial
+		evenResults := FFTAux(samples.Even(), ω2)
+		oddResults := FFTAux(samples.Odd(), ω2)
+
+		//merge back the result of the recursive results
 		results := make([]Complex, n)
-
-		// fmt.Println("even and odds", samples, evenPart, oddPart)
-		// fmt.Println(N, evenResults, oddResults)
-
+		ωk := Real(1)
 		for k := 0; k < n/2; k++ {
+			results[k] = Add(evenResults[k], Mult(ωk, oddResults[k]))
+			results[k+n/2] = Substract(evenResults[k], Mult(ωk, oddResults[k]))
 
-			results[k] = Add(evenResults[k], Mult(unityRoot, oddResults[k]))
-
+			ωk = Mult(ωk, ω) // avoid to call ω.Pow(k)
 		}
 
 		return results
@@ -123,10 +110,10 @@ func FFTAux(samples Polynomial, unityRoot Complex) FrequencyDomainData {
 
 }
 
-func FFT(samples timeDomainData) FrequencyDomainData {
-	return FFTAux(NewPolynomialFromReal(samples), Omega(1/float64(len(samples))))
+func FFT(samples TimeDomainData) FrequencyDomainData {
+	return FFTAux(Polynomial{samples}, Omega(1/float64(len(samples))))
 }
 
-// func inverseFFT(coefficients FrequencyDomainData) timeDomainData {
-// 	return FFTAux(Polynomial{coefficients}, Omega(-1/float64(len(coefficients))))
-// }
+func InverseFFT(coefficients FrequencyDomainData) TimeDomainData {
+	return MapCoefsToTimeDomainData(FFTAux(Polynomial{coefficients}, Omega(-1/float64(len(coefficients)))))
+}

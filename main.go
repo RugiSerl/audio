@@ -3,6 +3,7 @@ package main
 import (
 	"audio/audio"
 	"audio/window"
+	"audio/window/visual"
 	"fmt"
 )
 
@@ -18,7 +19,7 @@ func main() {
 
 	buf = audio.Filter(buf, 600)
 	audio.Save("assets/output.wav", buf, data)
-	list := audio.FourierTest(buf)
+	list := visual.FourierTest(buf)
 
 	window.InitVisual(buf, list, "assets/output.wav")
 	//window.Test()

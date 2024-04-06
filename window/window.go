@@ -1,7 +1,7 @@
 package window
 
 import (
-	m "audio/math"
+	"audio/window/visual"
 	"fmt"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -19,7 +19,7 @@ var (
 	soundStart float32 = 0
 )
 
-func displayVisual(m m.MagnitudesList, time float32) {
+func displayVisual(m visual.MagnitudesList, time float32) {
 	i := int((time - soundStart) / m.DeltaTime)
 	if i < len(m.Data) {
 		rl.DrawRectangleV(rl.NewVector2(float32(rl.GetScreenWidth())/2-SPECTRE_WIDTH/2, float32(rl.GetScreenHeight())/2-SPECTRE_HEIGHT/2), rl.NewVector2(SPECTRE_WIDTH, SPECTRE_HEIGHT), rl.Gray)
@@ -42,7 +42,7 @@ func playAudio(filename string) {
 	soundStart = float32(rl.GetTime())
 }
 
-func InitVisual(audioBuffer *audio.IntBuffer, magnitudeList m.MagnitudesList, filename string) {
+func InitVisual(audioBuffer *audio.IntBuffer, magnitudeList visual.MagnitudesList, filename string) {
 	rl.InitWindow(800, 450, "raylib [core] example - basic window")
 	rl.InitAudioDevice()
 
