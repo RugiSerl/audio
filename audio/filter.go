@@ -41,7 +41,7 @@ func Filter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
 		//fmt.Println(i*TimeInterval, " samples")
 
 		//signal decomposition
-		fourrierCoefficients = math.DFT(math.MapIntArrayToTimeDomainData(data.Data[i*TimeInterval : (i+1)*TimeInterval]))
+		fourrierCoefficients = math.FFT(math.MapIntArrayToTimeDomainData(data.Data[i*TimeInterval : (i+1)*TimeInterval]))
 
 		// frequency domain manipulation
 		for i := 0; i < len(fourrierCoefficients); i++ {
@@ -49,7 +49,7 @@ func Filter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
 		}
 
 		//reconstruction of signal
-		sample := math.MapTimeDomainDataToIntArray(math.InverseDFT(fourrierCoefficients))
+		sample := math.MapTimeDomainDataToIntArray(math.InverseFFT(fourrierCoefficients))
 		for j := 0; j < TimeInterval; j++ {
 			data.Data[i*TimeInterval+j] = sample[j]
 		}

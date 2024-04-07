@@ -6,10 +6,16 @@
 $$\begin{equation}
 \begin{split}   A\cos(\omega t) + B\sin(\omega t)
 &=\sqrt{A^2+B^2}(\frac {A} {\sqrt{A^2+B^2}}\cos(\omega t) + \frac {B} {\sqrt{A^2+B^2}}\sin(\omega t))\\
-&=\sqrt{A^2+B^2}(\cos(\arctan(\frac A B)) \cos(\omega t) - \sin(\arctan(\frac A B))\sin(\omega t))\\
-&=\sqrt{A^2+B^2}\cos(\omega t + \arctan(\frac A B))\\
+&=\sqrt{A^2+B^2}(\cos(\phi) \cos(\omega t) - \sin(\phi)\sin(\omega t))\\
+&=\sqrt{A^2+B^2}\cos(\omega t + \phi)\\
 \end{split}
 \end{equation}$$
+$${\text with}\begin{cases}
+   \cos(\phi) = \frac {A} {\sqrt{A^2+B^2}}\\
+   \sin(\phi) = \frac {B} {\sqrt{A^2+B^2}}
+\end{cases}$$
+$$\text {so }\tan(\phi) = \frac { \frac {B} {\sqrt{A^2+B^2}}} {\frac {A} {\sqrt{A^2+B^2}}} = \frac B A  $$
+$$\text {and therefore }\phi ≡ \arctan(\frac B A) + \frac \pi 2 [\pi]$$
 >*note: the signals must have the same frequency*
 
 
@@ -26,9 +32,12 @@ $$\forall n \in{\llbracket0, N-1 \rrbracket},  c_n = \sum_{k=0}^{N-1} s_ke^{-i2\
 >$$s_f(t) = Re(c_n)\cos(n\omega t) +Im(c_n)\sin(n\omega t)$$*
 
 If we were to factor the sine and cosine, we would get :
-$$Re(c_n)\cos(n\omega t) +Im(c_n)\sin(n\omega t) = \sqrt{Re(c_n)^2+Im(c_n)^2}\cos(n\omega t + \arctan(\frac {Re(c_n)} {Im(c_n)}))$$ 
-
-$$Re(c_n)\cos(n\omega t) +Im(c_n)\sin(n\omega t) = |c_n|\cos(n\omega t + \arg(c_n))$$ 
+$$\begin{equation}
+\begin{split}  Re(c_n)\cos(n\omega t) +Im(c_n)\sin(n\omega t)
+&=\sqrt{Re(c_n)^2+Im(c_n)^2}\cos(n\omega t + \phi) \\
+&=|c_n|\cos(n\omega t + \arg(c_n))
+\end{split}
+\end{equation}$$
 
 >In other words, $|c_n|$ is the magnitude of the frequency and $\arg(c_n)$ is the phase
 
@@ -65,7 +74,7 @@ and in our context:
 
 $$P(-\omega^k) = P(e^{i\pi}\omega^k) = P(\omega^{k+\frac N 2}) = P_{even}(\omega^{2k}) - \omega^kP_{odd}(\omega^{2k})$$
 
->This will allow us to reduce by half the amount of evaluations of $P$, since we will only have to compute $\omega^k$ for $k \in \llbracket 0, \frac N 2-1 \rrbracket$, and deduce the other values
+>This will allow us to reduce by half the amount of evaluations of $P$, since we will only have to compute $P(\omega^k)$ for $k \in \llbracket 0, \frac N 2-1 \rrbracket$, and deduce the other values
 
 So the point of the algorithm will be to calculate recursively $P_{even}(1), P_{even}(\omega^2), ..., P_{even}(\omega^{2(N-1)})$ and $P_{odd}(1), P_{odd}(\omega^2), ..., P_{odd}(\omega^{2(N-1)})$
 
