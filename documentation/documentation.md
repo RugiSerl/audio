@@ -1,7 +1,16 @@
 # Audio
 
 ### Preliminary
--
+- We often write $\cos(\omega t)$, with $\omega=2\pi f$, with $f$ the frequency of the signal, as a shortcut for $\cos(2\pi f t)$
+- Sine and cosine factorisation: we can factor $A\cos(\omega t) + B\sin(\omega t)$ like this:
+$$\begin{equation}
+\begin{split}   A\cos(\omega t) + B\sin(\omega t)
+&=\sqrt{A^2+B^2}(\frac {A} {\sqrt{A^2+B^2}}\cos(\omega t) + \frac {B} {\sqrt{A^2+B^2}}\sin(\omega t))\\
+&=\sqrt{A^2+B^2}(\cos(\arctan(\frac A B)) \cos(\omega t) - \sin(\arctan(\frac A B))\sin(\omega t))\\
+&=\sqrt{A^2+B^2}\cos(\omega t + \arctan(\frac A B))\\
+\end{split}
+\end{equation}$$
+>*note: the signals must have the same frequency*
 
 
 ### Discrete fourier transform (DFT)
@@ -11,17 +20,21 @@ For a given vector $(s_k)_{k\in{ \llbracket0, N-1 \rrbracket}}$ of samples, its 
 
 $$\forall n \in{\llbracket0, N-1 \rrbracket},  c_n = \sum_{k=0}^{N-1} s_ke^{-i2\pi k \frac n N}$$  
 
->Here, $c_n$ is a complex numbers whose real part is "the amount of cosine of the signal" and whose complex part is "the amount of sine of the signal".
+> I suggest you to watch [This 3Blue1Brown video](https://youtu.be/spUNpyF58BY), which gives a good idea of the intuition behind it.
+
+>Here, $c_n$ is a complex numbers whose real part is "the amount of cosine of the signal" and whose complex part is "the amount of sine of the signal", so if we where to "extract" the nth frequency of the signal, it would be like :
+>$$s_f(t) = Re(c_n)\cos(n\omega t) +Im(c_n)\sin(n\omega t)$$*
 
 If we were to factor the sine and cosine, we would get :
 $$Re(c_n)\cos(n\omega t) +Im(c_n)\sin(n\omega t) = \sqrt{Re(c_n)^2+Im(c_n)^2}\cos(n\omega t + \arctan(\frac {Re(c_n)} {Im(c_n)}))$$ 
 
-$$Re(c_n)\cos(n\omega t) +Im(c_n)\sin(n\omega t) = |c_n|\cos(n\omega t + \arg(c_n)))$$ 
+$$Re(c_n)\cos(n\omega t) +Im(c_n)\sin(n\omega t) = |c_n|\cos(n\omega t + \arg(c_n))$$ 
 
 >In other words, $|c_n|$ is the magnitude of the frequency and $\arg(c_n)$ is the phase
 
-So to compute naively all the coefficients, we would have two nested loops of N repetitions and the complexity would be $O(n^2)$.
->you can take a look in "math/fourier.go" at DFTAux()
+So to compute naively all the coefficients, we would have two nested loops of N repetitions and the complexity would be $O(N^2)$.
+
+>you can look the [implementation in Go](https://github.com/RugiSerl/audio/blob/main/math/fourier.go#L50). 
 
 The inverse fourier transform is defined as:
 
@@ -54,7 +67,7 @@ $$P(-\omega^k) = P(e^{i\pi}\omega^k) = P(\omega^{k+\frac N 2}) = P_{even}(\omega
 
 >This will allow us to reduce by half the amount of evaluations of $P$, since we will only have to compute $\omega^k$ for $k \in \llbracket 0, \frac N 2-1 \rrbracket$, and deduce the other values
 
-So the point of the algorithm will be to calculate recursively $P_{even}(1), P_{even}(\omega^2), ..., P_{even}(\omega^{2N})$ and $P_{odd}(1), P_{odd}(\omega^2), ..., P_{odd}(\omega^{2N})$
+So the point of the algorithm will be to calculate recursively $P_{even}(1), P_{even}(\omega^2), ..., P_{even}(\omega^{2(N-1)})$ and $P_{odd}(1), P_{odd}(\omega^2), ..., P_{odd}(\omega^{2(N-1)})$
 
 and now for $k \in \llbracket 0, \frac N 2-1 \rrbracket$ :
 $$\begin{cases}
@@ -86,6 +99,8 @@ function fft(P, ω) -> ComplexArray {
     return result;
 }
 ```
+
+>here's the [implementation in Go](https://github.com/RugiSerl/audio/blob/main/math/fourier.go#L83). 
 
 
 
