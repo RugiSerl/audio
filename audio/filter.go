@@ -2,7 +2,7 @@ package audio
 
 import (
 	"audio/math"
-	"fmt"
+	m "math"
 
 	"github.com/go-audio/audio"
 )
@@ -38,18 +38,18 @@ func Filter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
 	var fourrierCoefficients []math.Complex
 
 	for i := 0; i < len(data.Data)/TimeInterval; i++ {
-		fmt.Println(i*TimeInterval, " samples")
+		//fmt.Println(i*TimeInterval, " samples")
 
 		//signal decomposition
-		fourrierCoefficients = math.FFT(math.MapIntArrayToTimeDomainData(data.Data[i*TimeInterval : (i+1)*TimeInterval]))
+		fourrierCoefficients = math.DFT(math.MapIntArrayToTimeDomainData(data.Data[i*TimeInterval : (i+1)*TimeInterval]))
 
 		// frequency domain manipulation
-		// for i := len(fourrierCoefficients) / 8; i < len(fourrierCoefficients); i++ {
-		// 	fourrierCoefficients[i] = math.Real(0)
-		// }
+		for i := 0; i < len(fourrierCoefficients); i++ {
+			fourrierCoefficients[i] = math.Mult(fourrierCoefficients[i], math.Real(1/(1+m.Exp(0.001*(float64(i-len(fourrierCoefficients)/8))))))
+		}
 
 		//reconstruction of signal
-		sample := math.MapTimeDomainDataToIntArray(math.InverseFFT(fourrierCoefficients))
+		sample := math.MapTimeDomainDataToIntArray(math.InverseDFT(fourrierCoefficients))
 		for j := 0; j < TimeInterval; j++ {
 			data.Data[i*TimeInterval+j] = sample[j]
 		}

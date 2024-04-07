@@ -2,7 +2,6 @@ package visual
 
 import (
 	"audio/math"
-	"fmt"
 
 	"github.com/go-audio/audio"
 )
@@ -35,7 +34,7 @@ func FourierTest(data *audio.IntBuffer) MagnitudesList {
 	var maxMagnitude float64 = 0 // positive real number
 
 	for i := 0; i < len(data.Data)/TimeInterval; i++ {
-		fmt.Println(i*TimeInterval, " samples")
+		// fmt.Println(i*TimeInterval, " samples")
 		magnitudes, localmax := GetMagnitudes(math.MapIntArrayToTimeDomainData(data.Data), i*TimeInterval, (i+1)*TimeInterval)
 		List.Data = append(List.Data, magnitudes)
 
