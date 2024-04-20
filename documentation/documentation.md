@@ -43,7 +43,7 @@ $$\begin{equation}
 
 So to compute naively all the coefficients, we would have two nested loops of N repetitions and the complexity would be $O(N^2)$.
 
->you can look the [implementation in Go](https://github.com/RugiSerl/audio/blob/main/math/fourier.go#L50). 
+>you can look the [implementation in Go](https://github.com/RugiSerl/audio/blob/main/math/fourier.go#L61). 
 
 The inverse fourier transform is defined as:
 
@@ -109,7 +109,7 @@ function fft(P, ω) -> ComplexArray {
 }
 ```
 
->here's the [implementation in Go](https://github.com/RugiSerl/audio/blob/main/math/fourier.go#L83). 
+>here's the [implementation in Go](https://github.com/RugiSerl/audio/blob/main/math/fourier.go#L94). 
 
 
 
