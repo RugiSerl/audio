@@ -37,6 +37,17 @@ func MapCoefsToTimeDomainData(coefficients FrequencyDomainData) TimeDomainData {
 	return r
 }
 
+func AddZeroPadding[T any](slice []T, size int) []T {
+	if size > len(slice) {
+		t := make([]T, size) // golang will set everything to zero
+
+		copy(t, slice)
+		return t
+	}
+	return slice
+
+}
+
 //---------------------------------------------------------------------------------
 // Fourrier functions
 

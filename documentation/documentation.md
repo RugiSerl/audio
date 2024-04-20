@@ -12,11 +12,11 @@ $$\begin{equation}
 \end{equation}$$
 $${\text with}\begin{cases}
    \cos(\phi) = \frac {A} {\sqrt{A^2+B^2}}\\
-   \sin(\phi) = \frac {B} {\sqrt{A^2+B^2}}
+   \sin(\phi) = -\frac {B} {\sqrt{A^2+B^2}}
 \end{cases}$$
-$$\text {so }\tan(\phi) = \frac { \frac {B} {\sqrt{A^2+B^2}}} {\frac {A} {\sqrt{A^2+B^2}}} = \frac B A  $$
-$$\text {and therefore }\phi ≡ \arctan(\frac B A) + \frac \pi 2 [\pi]$$
->*note: the signals must have the same frequency*
+$$\text {so }\tan(\phi) = \frac { -\frac {B} {\sqrt{A^2+B^2}}} {\frac {A} {\sqrt{A^2+B^2}}} = -\frac B A  $$
+$$\text {and therefore }\phi ≡ \arctan(-\frac B A)  [\pi]$$
+>*Note: the signals must have the same frequency*
 
 
 ### Discrete fourier transform (DFT)
@@ -29,7 +29,7 @@ $$\forall n \in{\llbracket0, N-1 \rrbracket},  c_n = \sum_{k=0}^{N-1} s_ke^{-i2\
 > I suggest you to watch [This 3Blue1Brown video](https://youtu.be/spUNpyF58BY), which gives a good idea of the intuition behind it.
 
 >Here, $c_n$ is a complex numbers whose real part is "the amount of cosine of the signal" and whose complex part is "the amount of sine of the signal", so if we where to "extract" the nth frequency of the signal, it would be like :
->$$s_f(t) = Re(c_n)\cos(n\omega t) +Im(c_n)\sin(n\omega t)$$*
+>$$s_f(t) = Re(c_n)\cos(n\omega t) +Im(c_n)\sin(n\omega t)$$
 
 If we were to factor the sine and cosine, we would get :
 $$\begin{equation}

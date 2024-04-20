@@ -33,28 +33,26 @@ func ReduceAmp(data *audio.IntBuffer) *audio.IntBuffer {
 	return data
 }
 
-func Filter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
-	TimeInterval := 65536 //samples
-	var fourrierCoefficients []math.Complex
-
-	for i := 0; i < len(data.Data)/TimeInterval; i++ {
-		//fmt.Println(i*TimeInterval, " samples")
-
-		//signal decomposition
-		fourrierCoefficients = math.FFT(math.MapIntArrayToTimeDomainData(data.Data[i*TimeInterval : (i+1)*TimeInterval]))
-
-		// frequency domain manipulation
-		for i := 0; i < len(fourrierCoefficients); i++ {
-			fourrierCoefficients[i] = math.Mult(fourrierCoefficients[i], math.Real(1/(1+m.Exp(0.001*(float64(i-len(fourrierCoefficients)/8))))))
-		}
-
-		//reconstruction of signal
-		sample := math.MapTimeDomainDataToIntArray(math.InverseFFT(fourrierCoefficients))
-		for j := 0; j < TimeInterval; j++ {
-			data.Data[i*TimeInterval+j] = sample[j]
-		}
-
+func PassFilter(fourierCoefficients math.FrequencyDomainData, freqOffset float64, ease float64) math.FrequencyDomainData {
+	// frequency domain manipulation
+	for i := 0; i < len(fourierCoefficients); i++ {
+		fourierCoefficients[i] = math.Mult(fourierCoefficients[i], math.Real(1/(1+m.Exp((1/ease)*(float64(float64(i)-float64(len(fourierCoefficients))*freqOffset))))))
 	}
+
+	return fourierCoefficients
+}
+
+func Filter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
+	TimeInterval := int(m.Pow(2, m.Ceil(m.Log2(float64(len(data.Data)))))) //samples
+
+	// Signal decomposition
+	fourrierCoefficients := math.FFT(math.MapIntArrayToTimeDomainData(math.AddZeroPadding(data.Data, TimeInterval)))
+
+	// Frequency filtering
+	fourrierCoefficients = PassFilter(fourrierCoefficients, .9, -.01)
+
+	// Reconstruction of signal
+	data.Data = math.MapTimeDomainDataToIntArray(math.InverseFFT(fourrierCoefficients))
 
 	return data
 }
