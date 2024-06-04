@@ -2,7 +2,9 @@ package math
 
 import "math"
 
-//algebric complex number
+//Bruh I did all this without realizing that the complex type is already available natively in go.
+
+// algebric complex number
 type Complex struct {
 	Re, Im float64
 }
@@ -31,12 +33,12 @@ func ExpI(x float64) Complex {
 	return Complex{Re: math.Cos(x), Im: math.Sin(x)}
 }
 
-//Complex exponential
+// Complex exponential
 func Exp(z Complex) Complex {
 	return Mult(Real(math.Exp(z.Re)), ExpI(z.Im))
 }
 
-//just a shortcut
+// just a shortcut
 func Omega(power float64) Complex {
 	return ExpI(2 * math.Pi * float64(power))
 }

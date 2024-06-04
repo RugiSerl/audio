@@ -56,3 +56,15 @@ func Filter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
 
 	return data
 }
+
+func LowPassFilterTest(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
+	const tau = 60
+	var position float64 = 0
+
+	for i := range data.Data {
+		position = (float64(data.Data[i]) - position) / tau
+		data.Data[i] = int(position)
+	}
+
+	return data
+}

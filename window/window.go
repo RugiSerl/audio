@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
-	"github.com/go-audio/audio"
 )
 
 const (
@@ -42,7 +41,7 @@ func playAudio(filename string) {
 	soundStart = float32(rl.GetTime())
 }
 
-func InitVisual(audioBuffer *audio.IntBuffer, magnitudeList visual.MagnitudesList, filename string) {
+func DisplayVisual(magnitudeList visual.MagnitudesList, filename string) {
 	rl.InitWindow(800, 450, "raylib [core] example - basic window")
 	rl.InitAudioDevice()
 	rl.SetMasterVolume(0.1)
