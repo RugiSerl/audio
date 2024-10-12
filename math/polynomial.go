@@ -55,3 +55,19 @@ func (z Complex) Pow(exponent int) Complex {
 		return Complex{Re: 1, Im: 0}
 	}
 }
+
+func PowInt(base, exponent int) int {
+	if exponent == 0 {
+		return 1
+	} else if exponent == 1 {
+		return base
+	} else if exponent%2 == 0 {
+		r := PowInt(base, exponent/2)
+		return r * r
+	} else if exponent%2 == 1 {
+		r := PowInt(base, exponent/2)
+		return base * r * r
+	} else {
+		return 1
+	}
+}

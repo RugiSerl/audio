@@ -90,7 +90,7 @@ func InverseDFT(coefficients FrequencyDomainData) TimeDomainData {
 }
 
 // Cooley Tuckey divide and conquer algorithm.
-// Information and pseudo code here : https://fr.wikipedia.org/wiki/Transformation_de_Fourier_rapide#Pseudo-code
+// Information and pseudo c		ode here : https://fr.wikipedia.org/wiki/Transformation_de_Fourier_rapide#Pseudo-code
 func FFTAux(samples Polynomial, ω Complex) FrequencyDomainData {
 	N := len(samples.coefs)
 
