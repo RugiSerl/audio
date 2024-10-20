@@ -2,6 +2,7 @@ package audio
 
 import (
 	"audio/math"
+	"fmt"
 	m "math"
 
 	"github.com/go-audio/audio"
@@ -49,7 +50,7 @@ func Filter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
 	fourrierCoefficients := math.FFT(math.MapIntArrayToTimeDomainData(math.AddZeroPadding(data.Data, TimeInterval)))
 
 	// Frequency filtering
-	fourrierCoefficients = PassFilter(fourrierCoefficients, .9, -.01)
+	fourrierCoefficients = PassFilter(fourrierCoefficients, 0.995, -0.1)
 
 	// Reconstruction of signal
 	data.Data = math.MapTimeDomainDataToIntArray(math.InverseFFT(fourrierCoefficients))
@@ -57,13 +58,65 @@ func Filter(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
 	return data
 }
 
-func LowPassFilterTest(data *audio.IntBuffer, freqLimit int) *audio.IntBuffer {
-	const tau = 60
+func LowPassFilterTest(data *audio.IntBuffer, smoothness float64) *audio.IntBuffer {
 	var position float64 = 0
 
 	for i := range data.Data {
-		position = (float64(data.Data[i]) - position) / tau
+		position = float64(data.Data[i])*(1-smoothness) - position*smoothness
 		data.Data[i] = int(position)
+	}
+
+	return data
+}
+
+func Limiter(data *audio.IntBuffer) *audio.IntBuffer {
+	const gain float64 = 2
+	fmt.Println(data.SourceBitDepth)
+	amplitudeMax := float64(math.PowInt(2, data.SourceBitDepth-1) - 1)
+	var value float64
+
+	for i := range data.Data {
+		value = gain * float64(data.Data[i])
+
+		if m.Abs(value) > amplitudeMax {
+			value *= amplitudeMax / m.Abs(value)
+		}
+
+		data.Data[i] = int(value)
+
+	}
+
+	return data
+
+}
+
+func Normalize(data *audio.IntBuffer) *audio.IntBuffer {
+	amplitudeMax := float64(math.PowInt(2, data.SourceBitDepth-1) - 1)
+	var Max float64 = 0
+	for i := range data.Data {
+		Max = max(Max, m.Abs(float64(data.Data[i])))
+	}
+	for i := range data.Data {
+		data.Data[i] = int(amplitudeMax * float64(data.Data[i]) / Max)
+	}
+
+	return data
+
+}
+
+func Compressor(data *audio.IntBuffer) *audio.IntBuffer {
+	data = Normalize(data)
+	amplitudeMax := float64(math.PowInt(2, data.SourceBitDepth-1) - 1)
+	var Weekness float64 = 200 // need > 0. Makes the function converge to Id when weekness -> infinity
+
+	for i := range data.Data {
+		x := float64(data.Data[i])
+		if data.Data[i] > 0 {
+			data.Data[i] = int((amplitudeMax * (m.Pow(x/amplitudeMax-1, 2) + 1 + Weekness*x/amplitudeMax) / (Weekness + 1)))
+		} else {
+			data.Data[i] = int((-amplitudeMax * (m.Pow(-x/amplitudeMax-1, 2) + 1 - Weekness*x/amplitudeMax) / (Weekness + 1)))
+
+		}
 	}
 
 	return data
