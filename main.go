@@ -47,7 +47,7 @@ func demo() {
 
 	//visual.GenerateImage(math.WaveletTransform(math.HareWave, utils.Map(buf.Data, func(e int) float64 { return float64(e) })), "wavelet")
 
-	buf = audio.Compressor(buf)
+	buf = audio.Paulstretch(buf, 0.5)
 	fmt.Println("Filtering done. Saving...")
 	audio.Save("assets/output.wav", buf, data)
 

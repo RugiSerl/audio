@@ -13,6 +13,12 @@ func Real(x float64) Complex {
 	return Complex{x, 0}
 }
 
+// Yes I should have learned about this earlier
+func (z Complex) ToComplex() complex128 {
+	return complex(z.Re, z.Im)
+
+}
+
 // Multiply two complex numbers
 func Mult(z1, z2 Complex) Complex {
 	return Complex{Re: z1.Re*z2.Re - z1.Im*z2.Im, Im: z1.Re*z2.Im + z1.Im*z2.Re}

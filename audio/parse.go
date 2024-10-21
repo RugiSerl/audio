@@ -51,7 +51,7 @@ func Save(fileName string, buffer *audio.IntBuffer, param Parameters) error {
 	if err != nil {
 		return err
 	}
-	e := wav.NewEncoder(f, param.SampleRate, param.BitsPerSample, param.Channel, param.WaveFormatType)
+	e := wav.NewEncoder(f, buffer.Format.SampleRate, buffer.SourceBitDepth, buffer.Format.NumChannels, param.WaveFormatType)
 
 	e.Write(buffer)
 	e.Close()
